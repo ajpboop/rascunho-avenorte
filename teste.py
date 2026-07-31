@@ -59,7 +59,7 @@ class Subestacao:
 # 2. BANCO DE DADOS E ESTADO DA APLICAÇÃO
 # ==========================================
 
-# Coordenadas de Geolocalização (Ajuste para a sua localização real se desejar)
+# Coordenadas Reais do Google Earth
 COORDENADAS = {
     # Subestações
     "SE 1": {"lat": -23.697401, "lon": -52.618086},
@@ -357,7 +357,7 @@ with tab2:
 
     st.divider()
 
-    st.subheader("🗺️ Mapa do Arranjo Físico e Ligações (SE vs Arranjo)")
+    st.subheader("🗺️ Mapa do Arranjo Físico e Ligações (Satélite)")
 
     # Criação do Mapa Plotly
     fig = go.Figure()
@@ -377,7 +377,7 @@ with tab2:
                     mode="lines",
                     lon=[pt_arr["lon"], pt_se["lon"]],
                     lat=[pt_arr["lat"], pt_se["lat"]],
-                    line=dict(width=2, color="#1f77b4"),
+                    line=dict(width=3, color="#00FFFF"),  # Linha ciano destacada
                     hoverinfo="text",
                     text=f"Ligação: {arranjo_nome} ➔ {se_nome}",
                     showlegend=False,
@@ -401,7 +401,7 @@ with tab2:
         )
     )
 
-    # 3. Adicionar Marcadores dos Arranjos (Verde)
+    # 3. Adicionar Marcadores dos Arranjos (Verde Limão)
     arr_lats = [COORDENADAS[arr]["lat"] for arr in st.session_state.arranjos if arr in COORDENADAS]
     arr_lons = [COORDENADAS[arr]["lon"] for arr in st.session_state.arranjos if arr in COORDENADAS]
     arr_names = [arr for arr in st.session_state.arranjos if arr in COORDENADAS]
@@ -411,25 +411,22 @@ with tab2:
             mode="markers+text",
             lon=arr_lons,
             lat=arr_lats,
-            marker=dict(size=12, color="green"),
+            marker=dict(size=12, color="#00FF00"),
             text=arr_names,
             textposition="bottom center",
             name="Arranjos (CPs)",
         )
     )
 
-    # Configuração do Layout do Mapa
-# -----------------------------------------------------------
-    # CONFIGURAÇÃO DO MAPA COM CENTRALIZAÇÃO AUTOMÁTICA E ZOOM
-    # -----------------------------------------------------------
-    # Extrai todas as latitudes e longitudes válidas para achar o centro exato
+    # Centralização automática com base no centro geométrico dos pontos
     todas_lats = [v["lat"] for v in COORDENADAS.values()]
     todas_lons = [v["lon"] for v in COORDENADAS.values()]
 
     lat_central = sum(todas_lats) / len(todas_lats)
     lon_central = sum(todas_lons) / len(todas_lons)
 
-fig.update_layout(
+    # Configuração com camada de Satélite (ArcGIS World Imagery)
+    fig.update_layout(
         mapbox=dict(
             style="white-bg",
             layers=[
@@ -442,7 +439,7 @@ fig.update_layout(
                 }
             ],
             center=dict(lat=lat_central, lon=lon_central),
-            zoom=17.2,
+            zoom=17.0,
         ),
         margin={"r": 0, "t": 0, "l": 0, "b": 0},
         height=650,
