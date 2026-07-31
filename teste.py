@@ -263,30 +263,30 @@ tab1, tab2 = st.tabs(
 with tab1:
     st.subheader("Configuração por Arranjo Fotovoltaico")
 
-        arranjo_sel = st.selectbox(
-            "Selecione o Arranjo FV:", list(st.session_state.arranjos.keys())
+    arranjo_sel = st.selectbox(
+        "Selecione o Arranjo FV:", list(st.session_state.arranjos.keys())
+    )
+    obj_arranjo = st.session_state.arranjos[arranjo_sel]
+    se_atual = st.session_state.vinculos.get(arranjo_sel, "Nenhuma")
+    opcoes_se = ["Nenhuma"] + list(st.session_state.subestacoes.keys())
+
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Potência Pico", f"{obj_arranjo.potencia_pico_kwp} kWp")
+    m2.metric("Potência Instalada", f"{obj_arranjo.potencia_ca_kw} kW")
+    m3.metric("Nº de Strings", f"{obj_arranjo.num_strings}")
+
+    se_selecionada = st.selectbox(
+        "Vincular à Subestação:",
+        opcoes_se,
+        index=opcoes_se.index(se_atual) if se_atual in opcoes_se else 0,
+    )
+
+    if se_selecionada != se_atual:
+        st.session_state.vinculos[arranjo_sel] = (
+            se_selecionada if se_selecionada != "Nenhuma" else None
         )
-        obj_arranjo = st.session_state.arranjos[arranjo_sel]
-        se_atual = st.session_state.vinculos.get(arranjo_sel, "Nenhuma")
-        opcoes_se = ["Nenhuma"] + list(st.session_state.subestacoes.keys())
-
-        m1, m2, m3 = st.columns(3)
-        m1.metric("Potência Pico", f"{obj_arranjo.potencia_pico_kwp} kWp")
-        m2.metric("Potência Instalada", f"{obj_arranjo.potencia_ca_kw} kW")
-        m3.metric("Nº de Strings", f"{obj_arranjo.num_strings} ")
-
-        se_selecionada = st.selectbox(
-            "Vincular à Subestação:",
-            opcoes_se,
-            index=opcoes_se.index(se_atual) if se_atual in opcoes_se else 0,
-        )
-
-        if se_selecionada != se_atual:
-            st.session_state.vinculos[arranjo_sel] = (
-                se_selecionada if se_selecionada != "Nenhuma" else None
-            )
-            sincronizar_vinculos()
-            st.rerun()
+        sincronizar_vinculos()
+        st.rerun()
 
     st.divider()
 
