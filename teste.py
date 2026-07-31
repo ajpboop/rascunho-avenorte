@@ -4,15 +4,20 @@ import plotly.graph_objects as go
 import streamlit as st
 
 # Configuração da página
-st.set_page_config(
-    page_title="Painel FV vs Subestações", page_icon="⚡", layout="wide"
-)
+st.set_page_config(page_title="Painel FV", layout="wide")
+
+# Botão de alternância no topo / sidebar
+modo_escuro = st.sidebar.toggle("🌙 Night Mode", value=True)
 
 
-# Função para carregar o arquivo CSS externo
-def carregar_css(caminho_arquivo):
-    with open(caminho_arquivo, "r", encoding="utf-8") as f:
+# Aplica o CSS conforme a escolha
+def aplicar_tema(escuro=True):
+    arquivo_css = "style_dark.css" if escuro else "style_light.css"
+    with open(arquivo_css, "r", encoding="utf-8") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+
+aplicar_tema(modo_escuro)
 carregar_css("style.css")
 
 # Configuração da página
