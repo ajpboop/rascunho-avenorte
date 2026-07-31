@@ -233,6 +233,62 @@ def sincronizar_vinculos():
 
 sincronizar_vinculos()
 
+# ============================================================
+# SUMÁRIO EXECUTIVO E MATRIZ DE DISTÂNCIAS
+# ============================================================
+
+st.title("⚡ Painel FV vs Subestações")
+st.subheader("Sumário de Arranjos e Conexões")
+
+# --- 1. CARDS DE RESUMO RÁPIDO (Indicadores) ---
+col1, col2, col3, col4 = st.columns(4)
+
+with col1:
+    st.metric(label="Total de Subestações", value="4 SEs", delta="Mapeadas")
+
+with col2:
+    st.metric(label="Total de Arranjos FV", value="12 Arranjos", delta="Ativos")
+
+with col3:
+    st.metric(
+        label="Distância Média às SEs", value="4.2 km", delta="Raio Médio"
+    )
+
+with col4:
+    st.metric(
+        label="Menor Distância Encontrada",
+        value="0.8 km",
+        delta="SE Principal",
+    )
+
+st.markdown("---")
+
+# --- 2. TABELA INTERATIVA DE DISTÂNCIAS (Matriz SE vs Arranjos) ---
+st.markdown("### 📏 Distância Entre Arranjos e Subestações (km)")
+st.caption(
+    "Visão geral das distâncias calculadas em linha reta (ou rota) para cada ponto de conexão."
+)
+
+# Exemplo de dataframe estruturado para o sumário
+# (Substitua pelos seus dados reais calculados ou dataframes já existentes)
+dados_distancias = {
+    "Arranjo FV": ["Arranjo 01", "Arranjo 02", "Arranjo 03", "Arranjo 04"],
+    "Capacidade (MWp)": [2.5, 5.0, 3.2, 5.0],
+    "SE Central (km)": [1.2, 3.8, 5.1, 2.4],
+    "SE Norte (km)": [8.5, 4.2, 2.1, 6.7],
+    "SE Leste (km)": [3.4, 6.1, 7.8, 1.9],
+    "SE Recomendada": ["SE Central", "SE Central", "SE Norte", "SE Leste"],
+}
+
+# Exibição estilizada da tabela
+st.dataframe(
+    dados_distancias,
+    use_container_width=True,
+    hide_index=True,
+)
+
+st.markdown("---")
+
 # ==========================================
 # 3. INTERFACE STREAMLIT
 # ==========================================
