@@ -422,7 +422,7 @@ with tab2:
     fig.update_layout(
         mapbox_style="open-street-map",
         mapbox=dict(
-            center=dict(lat=-26.905, lon=-48.608),  # Centro inicial da visualização
+            center=dict(lat=-23.697238, lon=-52.616777),  # Centro inicial da visualização
             zoom=12.5,
         ),
         margin={"r": 0, "t": 0, "l": 0, "b": 0},
