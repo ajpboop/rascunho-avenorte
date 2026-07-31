@@ -263,7 +263,7 @@ tab1, tab2 = st.tabs(
 with tab1:
     st.subheader("Configuração por Arranjo Fotovoltaico")
 
-    col_arr_se = st.columns(2)
+    col_arr_se = st.columns(1)
 
     with col_arr_se:
         arranjo_sel = st.selectbox(
