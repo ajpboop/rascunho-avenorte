@@ -272,9 +272,9 @@ with tab1:
         obj_arranjo = st.session_state.arranjos[arranjo_sel]
 
         m1, m2, m3 = st.columns(3)
-        m1.metric("Potência DC (Módulos)", f"{obj_arranjo.potencia_pico_kwp} kWp")
-        m2.metric("Potência AC (Inversor)", f"{obj_arranjo.potencia_ca_kw} kW")
-        m3.metric("Nº de Strings", f"{obj_arranjo.num_strings} (Fixo)")
+        m1.metric("Potência Pico", f"{obj_arranjo.potencia_pico_kwp} kWp")
+        m2.metric("Potência Instalada", f"{obj_arranjo.potencia_ca_kw} kW")
+        m3.metric("Nº de Strings", f"{obj_arranjo.num_strings} ")
 
     with col_se:
         se_atual = st.session_state.vinculos.get(arranjo_sel, "Nenhuma")
