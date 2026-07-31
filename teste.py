@@ -36,22 +36,26 @@ class Subestacao:
     potencia_total_kva: float  # Potência Nominal da SE (kVA / kW)
     arranjos_vinculados: List[str] = field(default_factory=list)
 
-    def calcular_potencia_alocada(
-        self, dicionario_arranjos: Dict[str, ArranjoFV]
-    ) -> float:
-        """Soma a potência em kW (AC) de todos os arranjos conectados a esta SE."""
-        total = 0.0
-        for nome_arr an in self.arranjos_vinculados:
+
+def calcular_potencia_alocada(
+    self, dicionario_arranjos: Dict[str, ArranjoFV]
+) -> float:
+     """Soma a potência CA (kW) de TODOS os arranjos conectados a esta SE."""
+      total = 0.0
+       # <--- Corrigido aqui (estava 'nome_arr an')
+       for nome_arr in self.arranjos_vinculados:
             if nome_arr in dicionario_arranjos:
                 total += dicionario_arranjos[nome_arr].potencia_ca_kw
         return total
 
-    def verifica_suporte_global(
-        self, dicionario_arranjos: Dict[str, ArranjoFV]
-    ) -> bool:
-        """Regra GLOBAL: Avalia se o somatório de kW dos arranjos vinculados não excede a capacidade da SE."""
-        potencia_carregada = self.calcular_potencia_alocada(dicionario_arranjos)
-        return potencia_carregada <= self.potencia_total_kva
+
+def verifica_suporte_global(
+    self, dicionario_arranjos: Dict[str, ArranjoFV]
+) -> bool:
+     """Regra GLOBAL: Avalia se o somatório de kW dos arranjos vinculados não excede a capacidade da SE."""
+      potencia_carregada = self.calcular_potencia_alocada(
+           dicionario_arranjos)
+       return potencia_carregada <= self.potencia_total_kva
 
 
 # ==========================================
@@ -203,6 +207,8 @@ if "vinculos" not in st.session_state:
     }
 
 # Sincroniza vínculos dentro dos objetos das Subestações
+
+
 def sincronizar_vinculos():
     for se in st.session_state.subestacoes.values():
         se.arranjos_vinculados.clear()
@@ -244,7 +250,8 @@ with tab1:
 
         # Métricas do Arranjo Selecionado
         m1, m2, m3 = st.columns(3)
-        m1.metric("Potência DC (Módulos)", f"{obj_arranjo.potencia_pico_kwp} kWp")
+        m1.metric("Potência DC (Módulos)",
+                  f"{obj_arranjo.potencia_pico_kwp} kWp")
         m2.metric("Potência AC (Inversor)", f"{obj_arranjo.potencia_ca_kw} kW")
         m3.metric("Nº de Strings", f"{obj_arranjo.num_strings} (Fixo)")
 
