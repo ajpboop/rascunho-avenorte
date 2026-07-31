@@ -62,21 +62,21 @@ class Subestacao:
 # Coordenadas de Geolocalização (Ajuste para a sua localização real se desejar)
 COORDENADAS = {
     # Subestações
-    "SE 1": {"lat": -26.900, "lon": -48.600},
-    "SE 2": {"lat": -26.902, "lon": -48.605},
-    "SE 3": {"lat": -26.898, "lon": -48.595},
-    "SE 4": {"lat": -26.905, "lon": -48.610},
-    "SE 5": {"lat": -26.910, "lon": -48.615},
-    "SE 6": {"lat": -26.912, "lon": -48.620},
-    "SE 7": {"lat": -26.895, "lon": -48.590},
-    "SE 8": {"lat": -26.915, "lon": -48.625},
+    "SE 1": {"lat": -23.697401, "lon": -52.618086},
+    "SE 2": {"lat": -23.699054, "lon": -52.616319},
+    "SE 3": {"lat": -23.697263, "lon": -52.618407},
+    "SE 4": {"lat": -23.697584, "lon": -52.618658},
+    "SE 5": {"lat": -23.698702, "lon": -52.618521},
+    "SE 6": {"lat": -23.699014, "lon": -52.616323},
+    "SE 7": {"lat": -23.698566, "lon": -52.615919},
+    "SE 8": {"lat": -23.699912, "lon": -52.616115},
     # Arranjos
-    "Arranjo 1 (CP1)": {"lat": -26.901, "lon": -48.601},
-    "Arranjo 2 (CP2)": {"lat": -26.900, "lon": -48.602},
-    "Arranjo 3 (CP3)": {"lat": -26.903, "lon": -48.606},
-    "Arranjo 4 (CP4)": {"lat": -26.906, "lon": -48.611},
-    "Arranjo 5 (CP5)": {"lat": -26.911, "lon": -48.616},
-    "Arranjo 6 (CP6)": {"lat": -26.913, "lon": -48.621},
+    "Arranjo 1 (CP1)": {"lat": -23.696875, "lon": -52.618519},
+    "Arranjo 2 (CP2)": {"lat": -23.696993, "lon": -52.618243},
+    "Arranjo 3 (CP3)": {"lat": -23.696903, "lon": -52.618006},
+    "Arranjo 4 (CP4)": {"lat": -23.696713, "lon": -52.616384},
+    "Arranjo 5 (CP5)": {"lat": -23.697229, "lon": -52.616394},
+    "Arranjo 6 (CP6)": {"lat": -23.697229, "lon": -52.616152},
 }
 
 # Distâncias Lineares (Matriz Arranjo x SE)
