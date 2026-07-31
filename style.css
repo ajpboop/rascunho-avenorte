@@ -1,3 +1,8 @@
+/* ============================================================
+   ESTILO FRUTIGER AERO - STREAMLIT (VERSÃO CORRIGIDA)
+   Paleta: #FFC349 | #525EA7 | #5FACD3 | #97DDE9
+   ============================================================ */
+
 /* 1. Fundo Geral com Degradê Aero (Ciano -> Azul Claro) */
 .stApp {
     background: linear-gradient(135deg, #eaf9fc 0%, #97DDE9 40%, #5FACD3 100%) !important;
@@ -40,9 +45,9 @@ button[aria-selected="true"] {
 
 /* 3. Cards e Métricas (st.metric) estilo "Glossy" */
 div[data-testid="stMetric"] {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(230, 245, 250, 0.65) 100%);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(230, 245, 250, 0.75) 100%);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.95);
     border-radius: 14px;
     padding: 15px 20px;
     box-shadow: 0 8px 20px rgba(82, 94, 167, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8);
@@ -54,36 +59,63 @@ div[data-testid="stMetric"]:hover {
     border-color: #FFC349;
 }
 
-div[data-testid="stMetricLabel"] {
-    color: #525EA7 !important;
+/* Ajuste de Legibilidade dos Rótulos das Métricas */
+div[data-testid="stMetricLabel"],
+div[data-testid="stMetricLabel"] p,
+div[data-testid="stMetricLabel"] span {
+    color: #2b3875 !important;
     font-weight: 700 !important;
+    font-size: 0.9rem !important;
+    opacity: 1 !important;
 }
 
-div[data-testid="stMetricValue"] {
-    color: #1e2858 !important;
+/* Ajuste dos Valores Grandes das Métricas */
+div[data-testid="stMetricValue"],
+div[data-testid="stMetricValue"] div {
+    color: #0f172a !important;
     font-weight: 800 !important;
 }
 
-/* 4. Botões de Seleção e Input Box */
+/* Textos Secundários / Deltas dentro das Métricas */
+div[data-testid="stMetricDelta"], 
+div[data-testid="stMetricDelta"] span,
+div[data-testid="stMetricDelta"] svg {
+    color: #3b4580 !important;
+    background: rgba(255, 255, 255, 0.6) !important;
+    padding: 2px 8px !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+}
+
+/* 4. Labels e Botões de Seleção (Selectbox / Inputs) */
+label, 
+.stSelectbox label, 
+div[data-testid="stWidgetLabel"] p {
+    color: #1e2858 !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+}
+
 .stSelectbox div[data-baseweb="select"] > div {
     background: linear-gradient(180deg, #ffffff 0%, #f0f8fc 100%) !important;
     border-radius: 10px !important;
     border: 1px solid #5FACD3 !important;
     box-shadow: inset 0 1px 3px rgba(0,0,0,0.08), 0 2px 5px rgba(82, 94, 167, 0.1) !important;
-    color: #525EA7 !important;
+    color: #1e2858 !important;
 }
 
 /* 5. Tabela / Dataframe com Brilho Frutiger */
 div[data-testid="stDataFrame"] {
-    background: rgba(255, 255, 255, 0.75) !important;
+    background: rgba(255, 255, 255, 0.8) !important;
     backdrop-filter: blur(8px) !important;
     border-radius: 12px !important;
-    border: 1px solid rgba(255, 255, 255, 0.8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.9) !important;
     box-shadow: 0 6px 15px rgba(82, 94, 167, 0.1) !important;
     overflow: hidden;
 }
 
-/* 6. Caixas de Mensagem (Alertas OK / Erro) */
+/* 6. Caixas de Alertas e Notificações (Sucesso / Erro) */
 .stAlert {
     border-radius: 12px !important;
     backdrop-filter: blur(6px) !important;
@@ -91,9 +123,16 @@ div[data-testid="stDataFrame"] {
 }
 
 div[data-testid="stNotification-success"] {
-    background: linear-gradient(180deg, rgba(220, 248, 225, 0.9) 0%, rgba(180, 235, 190, 0.8) 100%) !important;
-    border: 1px solid #62c370 !important;
-    color: #1b4320 !important;
+    background: linear-gradient(180deg, rgba(200, 245, 210, 0.95) 0%, rgba(150, 230, 170, 0.9) 100%) !important;
+    border: 1px solid #48a855 !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1) !important;
+}
+
+div[data-testid="stNotification-success"] p,
+div[data-testid="stNotification-success"] span,
+div[data-testid="stNotification-success"] div {
+    color: #0d3b14 !important;
+    font-weight: 700 !important;
 }
 
 div[data-testid="stNotification-error"] {
@@ -109,7 +148,11 @@ h1, h2, h3 {
     font-weight: 700 !important;
 }
 
-/* 8. Estilo de Barra Lateral (Sidebar) se utilizar */
+/* 8. Textos Gerais e Barra Lateral */
+p, span {
+    color: #1c2e4a !important;
+}
+
 section[data-testid="stSidebar"] {
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(151, 221, 233, 0.4) 100%) !important;
     backdrop-filter: blur(12px) !important;
