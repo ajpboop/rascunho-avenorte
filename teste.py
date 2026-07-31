@@ -1,5 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
+import pandas as pd
+import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
@@ -14,8 +16,11 @@ st.set_page_config(
 
 # 2. Carrega o arquivo style.css externo
 def carregar_css(caminho):
-    with open(caminho, "r", encoding="utf-8") as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    try:
+        with open(caminho, "r", encoding="utf-8") as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    except FileNotFoundError:
+        pass
 
 
 carregar_css("style.css")
@@ -172,13 +177,19 @@ if "arranjos" not in st.session_state:
             nome="Arranjo 3 (CP3)", potencia_pico_kwp=97.5, potencia_ca_kw=75.0
         ),
         "Arranjo 4 (CP4)": ArranjoFV(
-            nome="Arranjo 4 (CP4)", potencia_pico_kwp=520.0, potencia_ca_kw=400.0
+            nome="Arranjo 4 (CP4)",
+            potencia_pico_kwp=520.0,
+            potencia_ca_kw=400.0,
         ),
         "Arranjo 5 (CP5)": ArranjoFV(
-            nome="Arranjo 5 (CP5)", potencia_pico_kwp=260.0, potencia_ca_kw=200.0
+            nome="Arranjo 5 (CP5)",
+            potencia_pico_kwp=260.0,
+            potencia_ca_kw=200.0,
         ),
         "Arranjo 6 (CP6)": ArranjoFV(
-            nome="Arranjo 6 (CP6)", potencia_pico_kwp=260.0, potencia_ca_kw=200.0
+            nome="Arranjo 6 (CP6)",
+            potencia_pico_kwp=260.0,
+            potencia_ca_kw=200.0,
         ),
     }
 
@@ -233,62 +244,6 @@ def sincronizar_vinculos():
 
 sincronizar_vinculos()
 
-# ============================================================
-# SUMÁRIO EXECUTIVO E MATRIZ DE DISTÂNCIAS
-# ============================================================
-
-st.title("⚡ Painel FV vs Subestações")
-st.subheader("Sumário de Arranjos e Conexões")
-
-# --- 1. CARDS DE RESUMO RÁPIDO (Indicadores) ---
-col1, col2, col3, col4 = st.columns(4)
-
-with col1:
-    st.metric(label="Total de Subestações", value="4 SEs", delta="Mapeadas")
-
-with col2:
-    st.metric(label="Total de Arranjos FV", value="12 Arranjos", delta="Ativos")
-
-with col3:
-    st.metric(
-        label="Distância Média às SEs", value="4.2 km", delta="Raio Médio"
-    )
-
-with col4:
-    st.metric(
-        label="Menor Distância Encontrada",
-        value="0.8 km",
-        delta="SE Principal",
-    )
-
-st.markdown("---")
-
-# --- 2. TABELA INTERATIVA DE DISTÂNCIAS (Matriz SE vs Arranjos) ---
-st.markdown("### 📏 Distância Entre Arranjos e Subestações (km)")
-st.caption(
-    "Visão geral das distâncias calculadas em linha reta (ou rota) para cada ponto de conexão."
-)
-
-# Exemplo de dataframe estruturado para o sumário
-# (Substitua pelos seus dados reais calculados ou dataframes já existentes)
-dados_distancias = {
-    "Arranjo FV": ["Arranjo 01", "Arranjo 02", "Arranjo 03", "Arranjo 04"],
-    "Capacidade (MWp)": [2.5, 5.0, 3.2, 5.0],
-    "SE Central (km)": [1.2, 3.8, 5.1, 2.4],
-    "SE Norte (km)": [8.5, 4.2, 2.1, 6.7],
-    "SE Leste (km)": [3.4, 6.1, 7.8, 1.9],
-    "SE Recomendada": ["SE Central", "SE Central", "SE Norte", "SE Leste"],
-}
-
-# Exibição estilizada da tabela
-st.dataframe(
-    dados_distancias,
-    use_container_width=True,
-    hide_index=True,
-)
-
-st.markdown("---")
-
 # ==========================================
 # 3. INTERFACE STREAMLIT
 # ==========================================
@@ -303,7 +258,7 @@ tab1, tab2 = st.tabs(
 )
 
 # -------------------------------------------------------------
-# TAB 1: VINCULAÇÃO E DIAGNÓSTICO DE ARRANJOS
+# TAB 1: VINCULAÇÃO E DIAGNÓSTICO DE ARRANJOS (INTEGRADA)
 # -------------------------------------------------------------
 with tab1:
     st.subheader("Configuração por Arranjo Fotovoltaico")
@@ -340,53 +295,124 @@ with tab1:
 
     st.divider()
 
-    st.markdown("### 🔍 Análise Automática da Ligação")
+    # --- ANÁLISE COMPARATIVA COMPLETA DE TODAS AS SEs PARA O ARRANJO SELECIONADO ---
+    st.markdown("### 🔍 Análise Comparativa de Subestações")
 
-    if se_selecionada == "Nenhuma" or not se_selecionada:
-        st.info("⚠️ Este arranjo não está vinculado a nenhuma subestação.")
-    else:
-        obj_se = st.session_state.subestacoes[se_selecionada]
+    # Construção dinâmica da tabela de dados para o Arranjo Selecionado
+    linhas_diagnostico = []
+    for nome_se, obj_se in st.session_state.subestacoes.items():
+        dist = DADOS_DISTANCIAS.get(nome_se, {}).get(arranjo_sel, 0)
+        cap = obj_se.potencia_total_kva
+        # Verifica se a capacidade total da SE suporta a potência AC do arranjo selecionado
+        suporta = cap >= obj_arranjo.potencia_ca_kw
 
-        distancia = DADOS_DISTANCIAS.get(se_selecionada, {}).get(
-            arranjo_sel, "N/A"
+        linhas_diagnostico.append(
+            {
+                "Subestação": nome_se,
+                "Distância (m)": dist,
+                "Capacidade SE (kVA)": cap,
+                "Suporta Arranjo?": "✅ Suporta"
+                if suporta
+                else "❌ Sobrecarga",
+            }
         )
-        carga_total_se = obj_se.calcular_potencia_alocada(
-            st.session_state.arranjos
-        )
-        capacidade_se = obj_se.potencia_total_kva
-        suporta_global = obj_se.verifica_suporte_global(
-            st.session_state.arranjos
+
+    df_diag = pd.DataFrame(linhas_diagnostico)
+
+    # Identificação da SE mais próxima e mais distante
+    se_mais_perto = df_diag.loc[df_diag["Distância (m)"].idxmin()]
+    se_mais_longe = df_diag.loc[df_diag["Distância (m)"].idxmax()]
+    se_aptas = df_diag[df_diag["Suporta Arranjo?"] == "✅ Suporta"].shape[0]
+
+    # --- CARDS RESUMO DE DIAGNÓSTICO ---
+    c_res1, c_res2, c_res3 = st.columns(3)
+
+    with c_res1:
+        st.metric(
+            label="🟢 SE Mais Próxima",
+            value=se_mais_perto["Subestação"],
+            delta=f"{se_mais_perto['Distância (m)']} metros",
         )
 
-        c1, c2, c3 = st.columns(3)
+    with c_res2:
+        st.metric(
+            label="🔴 SE Mais Distante",
+            value=se_mais_longe["Subestação"],
+            delta=f"{se_mais_longe['Distância (m)']} metros",
+            delta_color="inverse",
+        )
 
-        with c1:
-            st.metric(
-                label="Distância Linear",
-                value=f"{distancia} metros"
-                if isinstance(distancia, (int, float))
-                else distancia,
+    with c_res3:
+        st.metric(
+            label="⚡ SEs Com Capacidade",
+            value=f"{se_aptas} de {len(df_diag)} SEs",
+            delta="Aptas para Conexão Individual",
+        )
+
+    st.markdown("###")
+
+    # --- GRÁFICO E TABELA LADO A LADO ---
+    col_graf, col_tab = st.columns([1, 1])
+
+    with col_graf:
+        st.markdown("#### 📊 Distâncias por Subestação")
+
+        fig_bar = px.bar(
+            df_diag,
+            x="Subestação",
+            y="Distância (m)",
+            color="Suporta Arranjo?",
+            color_discrete_map={
+                "✅ Suporta": "#5FACD3",
+                "❌ Sobrecarga": "#FFC349",
+            },
+            text="Distância (m)",
+        )
+
+        fig_bar.update_layout(
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(color="#97DDE9"),
+            margin=dict(l=10, r=10, t=20, b=10),
+            xaxis_title="",
+            yaxis_title="Distância (metros)",
+            legend_title="Status",
+        )
+        fig_bar.update_traces(texttemplate="%{text}m", textposition="outside")
+
+        st.plotly_chart(fig_bar, use_container_width=True)
+
+    with col_tab:
+        st.markdown("#### 📋 Diagnóstico de Capacidades")
+
+        st.dataframe(
+            df_diag,
+            use_container_width=True,
+            hide_index=True,
+        )
+
+        # Alerta sobre a Subestação Vinculada Atual
+        if se_selecionada != "Nenhuma" and se_selecionada:
+            se_vinc_obj = st.session_state.subestacoes[se_selecionada]
+            dist_vinc = DADOS_DISTANCIAS.get(se_selecionada, {}).get(
+                arranjo_sel, "N/A"
+            )
+            suporta_glob = se_vinc_obj.verifica_suporte_global(
+                st.session_state.arranjos
             )
 
-        with c2:
-            st.metric(
-                label="Carregamento Total da SE",
-                value=f"{carga_total_se:,.1f} kW",
-                delta=f"Capacidade: {capacidade_se:,.1f} kVA",
-                delta_color="off",
-            )
-
-        with c3:
-            if suporta_global:
-                st.success("✅ **Transformadores: Suportam**")
-                st.caption(
-                    f"A SE {se_selecionada} está com {(carga_total_se/capacidade_se)*100:.1f}% da capacidade alocada."
+            if suporta_glob:
+                st.success(
+                    f"A **{se_selecionada}** vinculada está a **{dist_vinc}m** e suporta o carregamento total alocado!"
                 )
             else:
-                st.error("❌ **Transformadores: Sobrecarregados!**")
-                st.caption(
-                    f"Excesso de {carga_total_se - capacidade_se:,.1f} kW em relação ao limite nominal da SE."
+                st.error(
+                    f"Atenção: A **{se_selecionada}** vinculada está SOBRECARREGADA no acumulado geral dos arranjos!"
                 )
+        else:
+            st.info(
+                "Selecione uma Subestação no menu acima para validar o vínculo."
+            )
 
 # -------------------------------------------------------------
 # TAB 2: DASHBOARD E MAPA DE CONEXÕES
@@ -453,9 +479,19 @@ with tab2:
             )
 
     # 2. Adicionar Marcadores das Subestações (Vermelho)
-    se_lats = [COORDENADAS[se]["lat"] for se in st.session_state.subestacoes if se in COORDENADAS]
-    se_lons = [COORDENADAS[se]["lon"] for se in st.session_state.subestacoes if se in COORDENADAS]
-    se_names = [se for se in st.session_state.subestacoes if se in COORDENADAS]
+    se_lats = [
+        COORDENADAS[se]["lat"]
+        for se in st.session_state.subestacoes
+        if se in COORDENADAS
+    ]
+    se_lons = [
+        COORDENADAS[se]["lon"]
+        for se in st.session_state.subestacoes
+        if se in COORDENADAS
+    ]
+    se_names = [
+        se for se in st.session_state.subestacoes if se in COORDENADAS
+    ]
 
     fig.add_trace(
         go.Scattermapbox(
@@ -470,8 +506,16 @@ with tab2:
     )
 
     # 3. Adicionar Marcadores dos Arranjos (Verde Limão)
-    arr_lats = [COORDENADAS[arr]["lat"] for arr in st.session_state.arranjos if arr in COORDENADAS]
-    arr_lons = [COORDENADAS[arr]["lon"] for arr in st.session_state.arranjos if arr in COORDENADAS]
+    arr_lats = [
+        COORDENADAS[arr]["lat"]
+        for arr in st.session_state.arranjos
+        if arr in COORDENADAS
+    ]
+    arr_lons = [
+        COORDENADAS[arr]["lon"]
+        for arr in st.session_state.arranjos
+        if arr in COORDENADAS
+    ]
     arr_names = [arr for arr in st.session_state.arranjos if arr in COORDENADAS]
 
     fig.add_trace(
