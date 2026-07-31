@@ -3,67 +3,22 @@ from typing import Dict, List, Optional
 import plotly.graph_objects as go
 import streamlit as st
 
-# 1. Configuração da página (DEVE ser o primeiro comando Streamlit)
+# 1. Configura a página forçando o tema escuro nativo e ocultando a sidebar por padrão
 st.set_page_config(
-    page_title="Painel FV vs Subestações", page_icon="⚡", layout="wide"
+    page_title="Painel FV vs Subestações",
+    page_icon="⚡",
+    layout="wide",
+    initial_sidebar_state="collapsed",  # Mantém a sidebar recolhida
 )
 
-# 2. Botão de alternância de tema na barra lateral
-modo_escuro = st.sidebar.toggle("Modo Escuro", value=True)
 
-# 3. Definição dos estilos CSS (Embutidos)
-CSS_DARK = """
-.stApp { background: linear-gradient(135deg, #090e17 0%, #0f192b 40%, #172846 100%) !important; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important; color: #e1f5fe !important; }
-div[data-baseweb="tab-list"] { gap: 8px; background: rgba(15, 25, 43, 0.65) !important; backdrop-filter: blur(12px) !important; padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(95, 172, 211, 0.25) !important; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
-button[data-baseweb="tab"] { border-radius: 8px !important; background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%) !important; border: 1px solid rgba(255, 255, 255, 0.12) !important; color: #97DDE9 !important; font-weight: 600 !important; transition: all 0.3s ease !important; }
-button[data-baseweb="tab"]:hover { background: linear-gradient(180deg, #FFC349 0%, #e0a324 100%) !important; color: #0b111e !important; box-shadow: 0 0 14px rgba(255, 195, 73, 0.7) !important; border-color: #FFC349 !important; }
-button[aria-selected="true"] { background: linear-gradient(180deg, #5FACD3 0%, #3a8bb8 100%) !important; color: #080d1a !important; font-weight: 700 !important; border: 1px solid #97DDE9 !important; box-shadow: 0 0 12px rgba(95, 172, 211, 0.5), inset 0 1px 0 rgba(255,255,255,0.4) !important; }
-div[data-testid="stMetric"] { background: linear-gradient(180deg, rgba(23, 38, 66, 0.75) 0%, rgba(13, 22, 38, 0.85) 100%) !important; backdrop-filter: blur(12px) !important; border: 1px solid rgba(151, 221, 233, 0.2) !important; border-radius: 14px; padding: 15px 20px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important; transition: all 0.25s ease !important; }
-div[data-testid="stMetric"]:hover { transform: translateY(-2px); border-color: #5FACD3 !important; box-shadow: 0 10px 28px rgba(95, 172, 211, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important; }
-div[data-testid="stMetricLabel"], div[data-testid="stMetricLabel"] p, div[data-testid="stMetricLabel"] span { color: #97DDE9 !important; font-weight: 700 !important; font-size: 0.9rem !important; }
-div[data-testid="stMetricValue"], div[data-testid="stMetricValue"] div { color: #ffffff !important; font-weight: 800 !important; text-shadow: 0 2px 8px rgba(95, 172, 211, 0.4) !important; }
-div[data-testid="stMetricDelta"], div[data-testid="stMetricDelta"] span, div[data-testid="stMetricDelta"] svg { color: #FFC349 !important; background: rgba(255, 195, 73, 0.12) !important; border: 1px solid rgba(255, 195, 73, 0.3) !important; padding: 2px 8px !important; border-radius: 6px !important; font-weight: 600 !important; }
-label, .stSelectbox label, div[data-testid="stWidgetLabel"] p { color: #97DDE9 !important; font-weight: 700 !important; font-size: 0.95rem !important; }
-.stSelectbox div[data-baseweb="select"] > div { background: linear-gradient(180deg, #152238 0%, #0d1726 100%) !important; border-radius: 10px !important; border: 1px solid #5FACD3 !important; box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important; color: #ffffff !important; }
-.stSelectbox [data-baseweb="select"] span { color: #ffffff !important; }
-div[data-testid="stDataFrame"] { background: rgba(15, 25, 43, 0.8) !important; backdrop-filter: blur(10px) !important; border-radius: 12px !important; border: 1px solid rgba(151, 221, 233, 0.2) !important; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4) !important; }
-.stAlert { border-radius: 12px !important; backdrop-filter: blur(8px) !important; }
-div[data-testid="stNotification-success"] { background: linear-gradient(180deg, rgba(16, 54, 28, 0.85) 0%, rgba(9, 36, 18, 0.9) 100%) !important; border: 1px solid #48a855 !important; box-shadow: 0 0 15px rgba(72, 168, 85, 0.25) !important; }
-div[data-testid="stNotification-success"] p, div[data-testid="stNotification-success"] span, div[data-testid="stNotification-success"] div { color: #a3f7b5 !important; font-weight: 700 !important; }
-div[data-testid="stNotification-error"] { background: linear-gradient(180deg, rgba(64, 18, 18, 0.85) 0%, rgba(41, 10, 10, 0.9) 100%) !important; border: 1px solid #e65c5c !important; }
-h1, h2, h3 { color: #ffffff !important; text-shadow: 0 2px 10px rgba(95, 172, 211, 0.5) !important; font-weight: 700 !important; }
-p, span { color: #d1e8ff !important; }
-section[data-testid="stSidebar"] { background: linear-gradient(180deg, rgba(10, 16, 28, 0.85) 0%, rgba(18, 30, 52, 0.9) 100%) !important; backdrop-filter: blur(14px) !important; border-right: 1px solid rgba(151, 221, 233, 0.2) !important; }
-"""
+# 2. Carrega o arquivo style.css externo
+def carregar_css(caminho):
+    with open(caminho, "r", encoding="utf-8") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-CSS_LIGHT = """
-.stApp { background: linear-gradient(135deg, #eaf9fc 0%, #97DDE9 40%, #5FACD3 100%) !important; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important; color: #1c2e4a !important; }
-div[data-baseweb="tab-list"] { gap: 8px; background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(8px); padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 4px 12px rgba(82, 94, 167, 0.15); }
-button[data-baseweb="tab"] { border-radius: 8px !important; background: linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(210,235,245,0.5) 100%) !important; border: 1px solid rgba(255, 255, 255, 0.8) !important; color: #525EA7 !important; font-weight: 600 !important; transition: all 0.3s ease !important; }
-button[data-baseweb="tab"]:hover { background: linear-gradient(180deg, #FFC349 0%, #f7b221 100%) !important; color: #ffffff !important; box-shadow: 0 0 10px rgba(255, 195, 73, 0.6) !important; }
-button[aria-selected="true"] { background: linear-gradient(180deg, #525EA7 0%, #3b4580 100%) !important; color: #ffffff !important; border: 1px solid rgba(255, 255, 255, 0.9) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 3px 6px rgba(0,0,0,0.2) !important; }
-div[data-testid="stMetric"] { background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(230, 245, 250, 0.75) 100%); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.95); border-radius: 14px; padding: 15px 20px; box-shadow: 0 8px 20px rgba(82, 94, 167, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8); transition: transform 0.2s ease; }
-div[data-testid="stMetric"]:hover { transform: translateY(-2px); border-color: #FFC349; }
-div[data-testid="stMetricLabel"], div[data-testid="stMetricLabel"] p, div[data-testid="stMetricLabel"] span { color: #2b3875 !important; font-weight: 700 !important; font-size: 0.9rem !important; opacity: 1 !important; }
-div[data-testid="stMetricValue"], div[data-testid="stMetricValue"] div { color: #0f172a !important; font-weight: 800 !important; }
-div[data-testid="stMetricDelta"], div[data-testid="stMetricDelta"] span, div[data-testid="stMetricDelta"] svg { color: #3b4580 !important; background: rgba(255, 255, 255, 0.6) !important; padding: 2px 8px !important; border-radius: 6px !important; font-weight: 600 !important; }
-label, .stSelectbox label, div[data-testid="stWidgetLabel"] p { color: #1e2858 !important; font-weight: 700 !important; font-size: 0.95rem !important; text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8); }
-.stSelectbox div[data-baseweb="select"] > div { background: linear-gradient(180deg, #ffffff 0%, #f0f8fc 100%) !important; border-radius: 10px !important; border: 1px solid #5FACD3 !important; box-shadow: inset 0 1px 3px rgba(0,0,0,0.08), 0 2px 5px rgba(82, 94, 167, 0.1) !important; color: #1e2858 !important; }
-div[data-testid="stDataFrame"] { background: rgba(255, 255, 255, 0.8) !important; backdrop-filter: blur(8px) !important; border-radius: 12px !important; border: 1px solid rgba(255, 255, 255, 0.9) !important; box-shadow: 0 6px 15px rgba(82, 94, 167, 0.1) !important; overflow: hidden; }
-.stAlert { border-radius: 12px !important; backdrop-filter: blur(6px) !important; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important; }
-div[data-testid="stNotification-success"] { background: linear-gradient(180deg, rgba(200, 245, 210, 0.95) 0%, rgba(150, 230, 170, 0.9) 100%) !important; border: 1px solid #48a855 !important; box-shadow: 0 4px 10px rgba(0,0,0,0.1) !important; }
-div[data-testid="stNotification-success"] p, div[data-testid="stNotification-success"] span, div[data-testid="stNotification-success"] div { color: #0d3b14 !important; font-weight: 700 !important; }
-div[data-testid="stNotification-error"] { background: linear-gradient(180deg, rgba(255, 225, 225, 0.9) 0%, rgba(250, 190, 190, 0.8) 100%) !important; border: 1px solid #e65c5c !important; color: #5c1818 !important; }
-h1, h2, h3 { color: #2b3875 !important; text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8); font-weight: 700 !important; }
-p, span { color: #1c2e4a !important; }
-section[data-testid="stSidebar"] { background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(151, 221, 233, 0.4) 100%) !important; backdrop-filter: blur(12px) !important; border-right: 1px solid rgba(255, 255, 255, 0.6) !important; }
-"""
 
-# 4. Injeta o CSS correspondente
-css_ativo = CSS_DARK if modo_escuro else CSS_LIGHT
-st.markdown(f"<style>{css_ativo}</style>", unsafe_allow_html=True)
-
-# --- CONTINUAÇÃO DO SEU SCRIPT ---
+carregar_css("style.css")
 
 # ==========================================
 # 1. MODELAGEM DE CLASSES E OBJETOS
