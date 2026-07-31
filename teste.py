@@ -419,14 +419,33 @@ with tab2:
     )
 
     # Configuração do Layout do Mapa
-    fig.update_layout(
-        mapbox_style="open-street-map",
+# -----------------------------------------------------------
+    # CONFIGURAÇÃO DO MAPA COM CENTRALIZAÇÃO AUTOMÁTICA E ZOOM
+    # -----------------------------------------------------------
+    # Extrai todas as latitudes e longitudes válidas para achar o centro exato
+    todas_lats = [v["lat"] for v in COORDENADAS.values()]
+    todas_lons = [v["lon"] for v in COORDENADAS.values()]
+
+    lat_central = sum(todas_lats) / len(todas_lats)
+    lon_central = sum(todas_lons) / len(todas_lons)
+
+fig.update_layout(
         mapbox=dict(
-            center=dict(lat=-23.697238, lon=-52.616777),  # Centro inicial da visualização
-            zoom=12.5,
+            style="white-bg",
+            layers=[
+                {
+                    "below": "traces",
+                    "sourcetype": "raster",
+                    "source": [
+                        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                    ],
+                }
+            ],
+            center=dict(lat=lat_central, lon=lon_central),
+            zoom=17.2,
         ),
         margin={"r": 0, "t": 0, "l": 0, "b": 0},
-        height=550,
+        height=650,
     )
 
     st.plotly_chart(fig, use_container_width=True)
