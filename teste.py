@@ -263,22 +263,20 @@ tab1, tab2 = st.tabs(
 with tab1:
     st.subheader("Configuração por Arranjo Fotovoltaico")
 
-    col_arr, col_se = st.columns(2)
+    col_arr_se = st.columns(2)
 
-    with col_arr:
+    with col_arr_se:
         arranjo_sel = st.selectbox(
             "Selecione o Arranjo FV:", list(st.session_state.arranjos.keys())
         )
         obj_arranjo = st.session_state.arranjos[arranjo_sel]
+        se_atual = st.session_state.vinculos.get(arranjo_sel, "Nenhuma")
+        opcoes_se = ["Nenhuma"] + list(st.session_state.subestacoes.keys())
 
         m1, m2, m3 = st.columns(3)
         m1.metric("Potência Pico", f"{obj_arranjo.potencia_pico_kwp} kWp")
         m2.metric("Potência Instalada", f"{obj_arranjo.potencia_ca_kw} kW")
         m3.metric("Nº de Strings", f"{obj_arranjo.num_strings} ")
-
-    with col_se:
-        se_atual = st.session_state.vinculos.get(arranjo_sel, "Nenhuma")
-        opcoes_se = ["Nenhuma"] + list(st.session_state.subestacoes.keys())
 
         se_selecionada = st.selectbox(
             "Vincular à Subestação:",
