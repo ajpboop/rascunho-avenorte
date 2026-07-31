@@ -168,27 +168,27 @@ DADOS_DISTANCIAS = {
 if "arranjos" not in st.session_state:
     st.session_state.arranjos = {
         "Arranjo 1 (CP1)": ArranjoFV(
-            nome="Arranjo 1 (CP1)", potencia_pico_kwp=97.5, potencia_ca_kw=75.0
+            nome="Arranjo 1 (CP1)", potencia_pico_kwp=103.68, potencia_ca_kw=75.0
         ),
         "Arranjo 2 (CP2)": ArranjoFV(
-            nome="Arranjo 2 (CP2)", potencia_pico_kwp=97.5, potencia_ca_kw=75.0
+            nome="Arranjo 2 (CP2)", potencia_pico_kwp=115.2, potencia_ca_kw=75.0
         ),
         "Arranjo 3 (CP3)": ArranjoFV(
-            nome="Arranjo 3 (CP3)", potencia_pico_kwp=97.5, potencia_ca_kw=75.0
+            nome="Arranjo 3 (CP3)", potencia_pico_kwp=90.72, potencia_ca_kw=75.0
         ),
         "Arranjo 4 (CP4)": ArranjoFV(
             nome="Arranjo 4 (CP4)",
-            potencia_pico_kwp=520.0,
+            potencia_pico_kwp=580.4,
             potencia_ca_kw=400.0,
         ),
         "Arranjo 5 (CP5)": ArranjoFV(
             nome="Arranjo 5 (CP5)",
-            potencia_pico_kwp=260.0,
+            potencia_pico_kwp=208.8,
             potencia_ca_kw=200.0,
         ),
         "Arranjo 6 (CP6)": ArranjoFV(
             nome="Arranjo 6 (CP6)",
-            potencia_pico_kwp=260.0,
+            potencia_pico_kwp=250.52,
             potencia_ca_kw=200.0,
         ),
     }
