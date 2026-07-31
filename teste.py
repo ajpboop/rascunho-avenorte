@@ -8,6 +8,18 @@ st.set_page_config(
     page_title="Painel FV vs Subestações", page_icon="⚡", layout="wide"
 )
 
+
+# Função para carregar o arquivo CSS externo
+def carregar_css(caminho_arquivo):
+    with open(caminho_arquivo, "r", encoding="utf-8") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+carregar_css("style.css")
+
+# Configuração da página
+st.set_page_config(
+    page_title="Painel FV vs Subestações", page_icon="⚡", layout="wide"
+)
+
 # ==========================================
 # 1. MODELAGEM DE CLASSES E OBJETOS
 # ==========================================
