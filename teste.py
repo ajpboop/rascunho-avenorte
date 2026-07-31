@@ -150,9 +150,9 @@ DADOS_DISTANCIAS = {
         "Arranjo 1 (CP1)": 262,
         "Arranjo 2 (CP2)": 210,
         "Arranjo 3 (CP3)": 160,
-        "Arranjo 4 (CP4)": 387,
-        "Arranjo 5 (CP5)": 396,
-        "Arranjo 6 (CP6)": 395,
+        "Arranjo 4 (CP4)": 191,
+        "Arranjo 5 (CP5)": 267,
+        "Arranjo 6 (CP6)": 67,
     },
     "SE 8": {
         "Arranjo 1 (CP1)": 487,
