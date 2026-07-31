@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
+import plotly.graph_objects as go
 import streamlit as st
 
 # Configuração da página
@@ -57,6 +58,26 @@ class Subestacao:
 # ==========================================
 # 2. BANCO DE DADOS E ESTADO DA APLICAÇÃO
 # ==========================================
+
+# Coordenadas de Geolocalização (Ajuste para a sua localização real se desejar)
+COORDENADAS = {
+    # Subestações
+    "SE 1": {"lat": -26.900, "lon": -48.600},
+    "SE 2": {"lat": -26.902, "lon": -48.605},
+    "SE 3": {"lat": -26.898, "lon": -48.595},
+    "SE 4": {"lat": -26.905, "lon": -48.610},
+    "SE 5": {"lat": -26.910, "lon": -48.615},
+    "SE 6": {"lat": -26.912, "lon": -48.620},
+    "SE 7": {"lat": -26.895, "lon": -48.590},
+    "SE 8": {"lat": -26.915, "lon": -48.625},
+    # Arranjos
+    "Arranjo 1 (CP1)": {"lat": -26.901, "lon": -48.601},
+    "Arranjo 2 (CP2)": {"lat": -26.900, "lon": -48.602},
+    "Arranjo 3 (CP3)": {"lat": -26.903, "lon": -48.606},
+    "Arranjo 4 (CP4)": {"lat": -26.906, "lon": -48.611},
+    "Arranjo 5 (CP5)": {"lat": -26.911, "lon": -48.616},
+    "Arranjo 6 (CP6)": {"lat": -26.913, "lon": -48.621},
+}
 
 # Distâncias Lineares (Matriz Arranjo x SE)
 DADOS_DISTANCIAS = {
@@ -126,38 +147,26 @@ DADOS_DISTANCIAS = {
     },
 }
 
-# Inicialização dos Arranjos/CPs com a composição exata de inversores
+# Inicialização dos Arranjos/CPs
 if "arranjos" not in st.session_state:
     st.session_state.arranjos = {
         "Arranjo 1 (CP1)": ArranjoFV(
-            nome="Arranjo 1 (CP1)",
-            potencia_pico_kwp=97.5,
-            potencia_ca_kw=75.0,
+            nome="Arranjo 1 (CP1)", potencia_pico_kwp=97.5, potencia_ca_kw=75.0
         ),
         "Arranjo 2 (CP2)": ArranjoFV(
-            nome="Arranjo 2 (CP2)",
-            potencia_pico_kwp=97.5,
-            potencia_ca_kw=75.0,
+            nome="Arranjo 2 (CP2)", potencia_pico_kwp=97.5, potencia_ca_kw=75.0
         ),
         "Arranjo 3 (CP3)": ArranjoFV(
-            nome="Arranjo 3 (CP3)",
-            potencia_pico_kwp=97.5,
-            potencia_ca_kw=75.0,
+            nome="Arranjo 3 (CP3)", potencia_pico_kwp=97.5, potencia_ca_kw=75.0
         ),
         "Arranjo 4 (CP4)": ArranjoFV(
-            nome="Arranjo 4 (CP4)",
-            potencia_pico_kwp=520.0,
-            potencia_ca_kw=400.0,
+            nome="Arranjo 4 (CP4)", potencia_pico_kwp=520.0, potencia_ca_kw=400.0
         ),
         "Arranjo 5 (CP5)": ArranjoFV(
-            nome="Arranjo 5 (CP5)",
-            potencia_pico_kwp=260.0,
-            potencia_ca_kw=200.0,
+            nome="Arranjo 5 (CP5)", potencia_pico_kwp=260.0, potencia_ca_kw=200.0
         ),
         "Arranjo 6 (CP6)": ArranjoFV(
-            nome="Arranjo 6 (CP6)",
-            potencia_pico_kwp=260.0,
-            potencia_ca_kw=200.0,
+            nome="Arranjo 6 (CP6)", potencia_pico_kwp=260.0, potencia_ca_kw=200.0
         ),
     }
 
@@ -189,7 +198,6 @@ if "subestacoes" not in st.session_state:
         ),
     }
 
-# Relacionamento de Vinculação no State
 if "vinculos" not in st.session_state:
     st.session_state.vinculos = {
         "Arranjo 1 (CP1)": "SE 1",
@@ -223,7 +231,7 @@ st.caption(
 )
 
 tab1, tab2 = st.tabs(
-    ["🔗 Vinculação & Diagnóstico", "📊 Dashboard de Subestações"]
+    ["🔗 Vinculação & Diagnóstico", "📊 Dashboard & Mapa de Conexões"]
 )
 
 # -------------------------------------------------------------
@@ -240,7 +248,6 @@ with tab1:
         )
         obj_arranjo = st.session_state.arranjos[arranjo_sel]
 
-        # Métricas do Arranjo Selecionado
         m1, m2, m3 = st.columns(3)
         m1.metric("Potência DC (Módulos)", f"{obj_arranjo.potencia_pico_kwp} kWp")
         m2.metric("Potência AC (Inversor)", f"{obj_arranjo.potencia_ca_kw} kW")
@@ -256,7 +263,6 @@ with tab1:
             index=opcoes_se.index(se_atual) if se_atual in opcoes_se else 0,
         )
 
-        # Atualizar vínculo se alterado no selectbox
         if se_selecionada != se_atual:
             st.session_state.vinculos[arranjo_sel] = (
                 se_selecionada if se_selecionada != "Nenhuma" else None
@@ -266,7 +272,6 @@ with tab1:
 
     st.divider()
 
-    # RESULTADO DA LIGAÇÃO / ANÁLISE AUTOMÁTICA
     st.markdown("### 🔍 Análise Automática da Ligação")
 
     if se_selecionada == "Nenhuma" or not se_selecionada:
@@ -274,12 +279,9 @@ with tab1:
     else:
         obj_se = st.session_state.subestacoes[se_selecionada]
 
-        # 1. Distância Linear (Consulta Automática)
         distancia = DADOS_DISTANCIAS.get(se_selecionada, {}).get(
             arranjo_sel, "N/A"
         )
-
-        # 2. Análise Global de Carregamento da SE
         carga_total_se = obj_se.calcular_potencia_alocada(
             st.session_state.arranjos
         )
@@ -319,10 +321,10 @@ with tab1:
                 )
 
 # -------------------------------------------------------------
-# TAB 2: DASHBOARD DE SUBESTAÇÕES (VISÃO GLOBAL)
+# TAB 2: DASHBOARD E MAPA DE CONEXÕES
 # -------------------------------------------------------------
 with tab2:
-    st.subheader("Status de Carregamento Global por Subestação")
+    st.subheader("📊 Status de Carregamento Global por Subestação")
 
     rows = []
     for nome_se, se in st.session_state.subestacoes.items():
@@ -352,3 +354,79 @@ with tab2:
         )
 
     st.dataframe(rows, use_container_width=True)
+
+    st.divider()
+
+    st.subheader("🗺️ Mapa do Arranjo Físico e Ligações (SE vs Arranjo)")
+
+    # Criação do Mapa Plotly
+    fig = go.Figure()
+
+    # 1. Desenhar as Linhas de Conexão entre Arranjos e SEs
+    for arranjo_nome, se_nome in st.session_state.vinculos.items():
+        if (
+            se_nome
+            and arranjo_nome in COORDENADAS
+            and se_nome in COORDENADAS
+        ):
+            pt_arr = COORDENADAS[arranjo_nome]
+            pt_se = COORDENADAS[se_nome]
+
+            fig.add_trace(
+                go.Scattermapbox(
+                    mode="lines",
+                    lon=[pt_arr["lon"], pt_se["lon"]],
+                    lat=[pt_arr["lat"], pt_se["lat"]],
+                    line=dict(width=2, color="#1f77b4"),
+                    hoverinfo="text",
+                    text=f"Ligação: {arranjo_nome} ➔ {se_nome}",
+                    showlegend=False,
+                )
+            )
+
+    # 2. Adicionar Marcadores das Subestações (Vermelho)
+    se_lats = [COORDENADAS[se]["lat"] for se in st.session_state.subestacoes if se in COORDENADAS]
+    se_lons = [COORDENADAS[se]["lon"] for se in st.session_state.subestacoes if se in COORDENADAS]
+    se_names = [se for se in st.session_state.subestacoes if se in COORDENADAS]
+
+    fig.add_trace(
+        go.Scattermapbox(
+            mode="markers+text",
+            lon=se_lons,
+            lat=se_lats,
+            marker=dict(size=14, color="red"),
+            text=se_names,
+            textposition="top center",
+            name="Subestações (SE)",
+        )
+    )
+
+    # 3. Adicionar Marcadores dos Arranjos (Verde)
+    arr_lats = [COORDENADAS[arr]["lat"] for arr in st.session_state.arranjos if arr in COORDENADAS]
+    arr_lons = [COORDENADAS[arr]["lon"] for arr in st.session_state.arranjos if arr in COORDENADAS]
+    arr_names = [arr for arr in st.session_state.arranjos if arr in COORDENADAS]
+
+    fig.add_trace(
+        go.Scattermapbox(
+            mode="markers+text",
+            lon=arr_lons,
+            lat=arr_lats,
+            marker=dict(size=12, color="green"),
+            text=arr_names,
+            textposition="bottom center",
+            name="Arranjos (CPs)",
+        )
+    )
+
+    # Configuração do Layout do Mapa
+    fig.update_layout(
+        mapbox_style="open-street-map",
+        mapbox=dict(
+            center=dict(lat=-26.905, lon=-48.608),  # Centro inicial da visualização
+            zoom=12.5,
+        ),
+        margin={"r": 0, "t": 0, "l": 0, "b": 0},
+        height=550,
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
