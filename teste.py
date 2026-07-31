@@ -3,22 +3,31 @@ from typing import Dict, List, Optional
 import plotly.graph_objects as go
 import streamlit as st
 
-# Configuração da página
-st.set_page_config(page_title="Painel FV", layout="wide")
+# 1. Configuração da página (DEVE ser o ÚNICO e o PRIMEIRO comando Streamlit)
+st.set_page_config(
+    page_title="Painel FV vs Subestações", page_icon="⚡", layout="wide"
+)
 
-# Botão de alternância no topo / sidebar
+# 2. Botão de alternância na Sidebar
 modo_escuro = st.sidebar.toggle("🌙 Night Mode", value=True)
 
 
-# Aplica o CSS conforme a escolha
+# 3. Função para aplicar o CSS (Light ou Dark)
 def aplicar_tema(escuro=True):
     arquivo_css = "style_dark.css" if escuro else "style_light.css"
-    with open(arquivo_css, "r", encoding="utf-8") as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    try:
+        with open(arquivo_css, "r", encoding="utf-8") as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    except FileNotFoundError:
+        st.error(
+            f"Arquivo `{arquivo_css}` não encontrado na pasta do projeto!"
+        )
 
 
+# 4. Aplica o tema escolhido
 aplicar_tema(modo_escuro)
-carregar_css("style.css")
+
+# --- O RESTANTE DO SEU CÓDIGO VEM AQUI ---
 
 # Configuração da página
 st.set_page_config(
